@@ -4,14 +4,12 @@ import DataTable from "react-data-table-component";
 const EmployeeTable = ({
   employees = [],
   isLoading = false,
-
   pagination = {
     total: 0,
     page: 1,
     limit: 10,
     totalPages: 0,
   },
-
   onPageChange,
   onRowsPerPageChange,
   onEdit,
@@ -80,6 +78,19 @@ const EmployeeTable = ({
 
   const columns = [
     {
+      name: "S.No",
+      width: "80px",
+      center: true,
+      cell: (row, index) => {
+        const serialNumber = (currentPage - 1) * rowsPerPage + index + 1;
+
+        return (
+          <span className="font-medium text-gray-700">{serialNumber}</span>
+        );
+      },
+    },
+
+    {
       name: "Employee Name",
       selector: (row) => row.employeeName || "-",
       sortable: true,
@@ -132,7 +143,7 @@ const EmployeeTable = ({
         <div className="flex gap-2">
           <button
             type="button"
-            onClick={() => onEdit && onEdit(row)}
+            onClick={() => onEdit?.(row)}
             className="rounded-md bg-blue-100 px-3 py-1 text-sm text-blue-700 transition hover:bg-blue-200"
           >
             Edit
