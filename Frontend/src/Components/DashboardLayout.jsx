@@ -1,39 +1,30 @@
-import {
-    Outlet
-} from "react-router-dom";
+import { Outlet } from "react-router-dom";
 
 import Sidebar from "./Sidebar.jsx";
 
-
 const DashboardLayout = () => {
-
-    return (
-
-        <div className="
+  return (
+    <div
+      className="
             min-h-screen
             bg-gray-100
-        ">
+        "
+    >
+      <Sidebar />
 
-            <Sidebar />
+      {/* Main Content */}
 
-
-            {/* Main Content */}
-
-            <main className="
+      <main
+        className="
                 ml-64
                 min-h-screen
                 p-6
-            ">
-
-                <Outlet />
-
-            </main>
-
-        </div>
-
-    );
-
+            "
+      >
+        <Outlet />
+      </main>
+    </div>
+  );
 };
-
 
 export default DashboardLayout;

@@ -1,50 +1,36 @@
-import {
-    NavLink,
-    useNavigate
-} from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
-import {
-    LayoutDashboard,
-    Users,
-    LogOut
-} from "lucide-react";
-
+import { LayoutDashboard, Users, LogOut } from "lucide-react";
 
 const Sidebar = () => {
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  const handleLogout = () => {
+    localStorage.removeItem("token");
 
+    localStorage.removeItem("user");
 
-    const handleLogout = () => {
+    navigate("/login", {
+      replace: true,
+    });
+  };
 
-        localStorage.removeItem("token");
+  const menuItems = [
+    {
+      name: "Dashboard",
+      path: "/dashboard",
+      icon: LayoutDashboard,
+    },
+    {
+      name: "Employees",
+      path: "/employees",
+      icon: Users,
+    },
+  ];
 
-        localStorage.removeItem("user");
-
-        navigate("/login", {
-            replace: true
-        });
-
-    };
-
-
-    const menuItems = [
-        {
-            name: "Dashboard",
-            path: "/dashboard",
-            icon: LayoutDashboard
-        },
-        {
-            name: "Employees",
-            path: "/employees",
-            icon: Users
-        }
-    ];
-
-
-    return (
-
-        <aside className="
+  return (
+    <aside
+      className="
             fixed
             left-0
             top-0
@@ -53,50 +39,46 @@ const Sidebar = () => {
             w-64
             bg-slate-900
             text-white
-        ">
+        "
+    >
+      {/* Logo */}
 
-            {/* Logo */}
-
-            <div className="
+      <div
+        className="
                 flex
                 h-16
                 items-center
                 border-b
                 border-slate-700
                 px-6
-            ">
-
-                <h1 className="
+            "
+      >
+        <h1
+          className="
                     text-xl
                     font-bold
-                ">
-                    Employee Management
-                </h1>
+                "
+        >
+          Employee Management
+        </h1>
+      </div>
 
-            </div>
+      {/* Menu */}
 
-
-            {/* Menu */}
-
-            <nav className="
+      <nav
+        className="
                 mt-6
                 px-3
-            ">
+            "
+      >
+        {menuItems.map((item) => {
+          const Icon = item.icon;
 
-                {menuItems.map(
-                    (item) => {
-
-                        const Icon =
-                            item.icon;
-
-                        return (
-
-                            <NavLink
-                                key={item.path}
-                                to={item.path}
-                                className={({
-                                    isActive
-                                }) => `
+          return (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) => `
                                     mb-2
                                     flex
                                     items-center
@@ -106,43 +88,33 @@ const Sidebar = () => {
                                     py-3
                                     transition
                                     ${
-                                        isActive
-                                            ? "bg-blue-600 text-white"
-                                            : "text-slate-300 hover:bg-slate-800"
+                                      isActive
+                                        ? "bg-blue-600 text-white"
+                                        : "text-slate-300 hover:bg-slate-800"
                                     }
                                 `}
-                            >
+            >
+              <Icon size={20} />
 
-                                <Icon
-                                    size={20}
-                                />
+              <span>{item.name}</span>
+            </NavLink>
+          );
+        })}
+      </nav>
 
-                                <span>
-                                    {item.name}
-                                </span>
+      {/* Logout */}
 
-                            </NavLink>
-
-                        );
-
-                    }
-                )}
-
-            </nav>
-
-
-            {/* Logout */}
-
-            <div className="
+      <div
+        className="
                 absolute
                 bottom-5
                 w-full
                 px-3
-            ">
-
-                <button
-                    onClick={handleLogout}
-                    className="
+            "
+      >
+        <button
+          onClick={handleLogout}
+          className="
                         flex
                         w-full
                         items-center
@@ -155,25 +127,14 @@ const Sidebar = () => {
                         hover:bg-red-600
                         hover:text-white
                     "
-                >
+        >
+          <LogOut size={20} />
 
-                    <LogOut
-                        size={20}
-                    />
-
-                    <span>
-                        Logout
-                    </span>
-
-                </button>
-
-            </div>
-
-        </aside>
-
-    );
-
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+  );
 };
-
 
 export default Sidebar;

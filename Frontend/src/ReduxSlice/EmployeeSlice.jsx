@@ -1,329 +1,177 @@
-import {
-    createAsyncThunk,
-    createSlice
-} from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 
-import Api from "../Api/Api.jsx"
+import Api from "../Api/Api.jsx";
 
+export const getEmployees = createAsyncThunk(
+  "employee/getEmployees",
+  async (params, { rejectWithValue }) => {
+    try {
+      const query = new URLSearchParams(params).toString();
 
-export const getEmployees =
-    createAsyncThunk(
-        "employee/getEmployees",
-        async (
-            params,
-            { rejectWithValue }
-        ) => {
+      const response = await Api(`/employee?${query}`);
 
-            try {
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
 
-                const query =
-                    new URLSearchParams(
-                        params
-                    ).toString();
+export const createEmployee = createAsyncThunk(
+  "employee/create",
+  async (employeeData, { rejectWithValue }) => {
+    try {
+      const response = await Api("/employee", {
+        method: "POST",
 
+        body: JSON.stringify(employeeData),
+      });
 
-                const response =
-                    await Api(
-                        `/employee?${query}`
-                    );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
 
+export const updateEmployee = createAsyncThunk(
+  "employee/update",
+  async ({ id, data }, { rejectWithValue }) => {
+    try {
+      const response = await Api(`/employee/${id}`, {
+        method: "PUT",
 
-                return response.data;
+        body: JSON.stringify(data),
+      });
 
-            } catch (error) {
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
 
-                return rejectWithValue(
-                    error.message
-                );
-            }
-        }
-    );
+export const deleteEmployee = createAsyncThunk(
+  "employee/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      await Api(`/employee/${id}`, {
+        method: "DELETE",
+      });
 
+      return id;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
 
-export const createEmployee =
-    createAsyncThunk(
-        "employee/create",
-        async (
-            employeeData,
-            { rejectWithValue }
-        ) => {
+export const getAnalytics = createAsyncThunk(
+  "employee/analytics",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await Api("/employee/analytics");
 
-            try {
-
-                const response =
-                    await Api(
-                        "/employee",
-                        {
-                            method: "POST",
-
-                            body:
-                                JSON.stringify(
-                                    employeeData
-                                )
-                        }
-                    );
-
-
-                return response.data;
-
-            } catch (error) {
-
-                return rejectWithValue(
-                    error.message
-                );
-            }
-        }
-    );
-
-
-export const updateEmployee =
-    createAsyncThunk(
-        "employee/update",
-        async (
-            { id, data },
-            { rejectWithValue }
-        ) => {
-
-            try {
-
-                const response =
-                    await Api(
-                        `/employee/${id}`,
-                        {
-                            method: "PUT",
-
-                            body:
-                                JSON.stringify(data)
-                        }
-                    );
-
-
-                return response.data;
-
-            } catch (error) {
-
-                return rejectWithValue(
-                    error.message
-                );
-            }
-        }
-    );
-
-
-export const deleteEmployee =
-    createAsyncThunk(
-        "employee/delete",
-        async (
-            id,
-            { rejectWithValue }
-        ) => {
-
-            try {
-
-                await Api(
-                    `/employee/${id}`,
-                    {
-                        method: "DELETE"
-                    }
-                );
-
-
-                return id;
-
-            } catch (error) {
-
-                return rejectWithValue(
-                    error.message
-                );
-            }
-        }
-    );
-
-
-export const getAnalytics =
-    createAsyncThunk(
-        "employee/analytics",
-        async (
-            _,
-            { rejectWithValue }
-        ) => {
-
-            try {
-
-                const response =
-                    await Api(
-                        "/employee/analytics"
-                    );
-
-
-                return response.data;
-
-            } catch (error) {
-
-                return rejectWithValue(
-                    error.message
-                );
-            }
-        }
-    );
-
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  },
+);
 
 const initialState = {
+  employees: [],
 
-    employees: [],
+  pagination: {
+    total: 0,
 
-    pagination: {
+    page: 1,
 
-        total: 0,
+    limit: 10,
 
-        page: 1,
+    totalPages: 0,
+  },
 
-        limit: 10,
+  analytics: null,
 
-        totalPages: 0
-    },
+  isLoading: false,
 
-    analytics: null,
-
-    isLoading: false,
-
-    error: null
+  error: null,
 };
 
+const employeeSlice = createSlice({
+  name: "employee",
 
-const employeeSlice =
-    createSlice({
+  initialState,
 
-        name: "employee",
+  reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
+  },
 
-        initialState,
+  extraReducers: (builder) => {
+    builder
 
-        reducers: {
+      // GET
+      .addCase(getEmployees.pending, (state) => {
+        state.isLoading = true;
 
-            clearError: (state) => {
+        state.error = null;
+      })
 
-                state.error = null;
-            }
+      .addCase(getEmployees.fulfilled, (state, action) => {
+        state.isLoading = false;
 
-        },
+        state.employees = action.payload.employees;
 
+        state.pagination = action.payload.pagination;
+      })
 
-        extraReducers: (builder) => {
+      .addCase(getEmployees.rejected, (state, action) => {
+        state.isLoading = false;
 
-            builder
+        state.error = action.payload;
+      })
 
-                // GET
-                .addCase(
-                    getEmployees.pending,
-                    (state) => {
+      // CREATE
+      .addCase(createEmployee.fulfilled, (state) => {
+        state.isLoading = false;
+      })
 
-                        state.isLoading = true;
+      // UPDATE
+      .addCase(updateEmployee.fulfilled, (state) => {
+        state.isLoading = false;
+      })
 
-                        state.error = null;
-                    }
-                )
+      // DELETE
+      .addCase(deleteEmployee.fulfilled, (state, action) => {
+        state.isLoading = false;
 
-                .addCase(
-                    getEmployees.fulfilled,
-                    (state, action) => {
+        state.employees = state.employees.filter(
+          (employee) => employee._id !== action.payload,
+        );
+      })
 
-                        state.isLoading = false;
+      // ANALYTICS
+      .addCase(getAnalytics.pending, (state) => {
+        state.isLoading = true;
+      })
 
-                        state.employees =
-                            action.payload.employees;
+      .addCase(getAnalytics.fulfilled, (state, action) => {
+        state.isLoading = false;
 
-                        state.pagination =
-                            action.payload.pagination;
-                    }
-                )
+        state.analytics = action.payload;
+      })
 
-                .addCase(
-                    getEmployees.rejected,
-                    (state, action) => {
+      .addCase(getAnalytics.rejected, (state, action) => {
+        state.isLoading = false;
 
-                        state.isLoading = false;
+        state.error = action.payload;
+      });
+  },
+});
 
-                        state.error =
-                            action.payload;
-                    }
-                )
-
-
-                // CREATE
-                .addCase(
-                    createEmployee.fulfilled,
-                    (state) => {
-
-                        state.isLoading = false;
-                    }
-                )
-
-
-                // UPDATE
-                .addCase(
-                    updateEmployee.fulfilled,
-                    (state) => {
-
-                        state.isLoading = false;
-                    }
-                )
-
-
-                // DELETE
-                .addCase(
-                    deleteEmployee.fulfilled,
-                    (state, action) => {
-
-                        state.isLoading = false;
-
-                        state.employees =
-                            state.employees.filter(
-                                (employee) =>
-                                    employee._id !==
-                                    action.payload
-                            );
-                    }
-                )
-
-
-                // ANALYTICS
-                .addCase(
-                    getAnalytics.pending,
-                    (state) => {
-
-                        state.isLoading = true;
-                    }
-                )
-
-                .addCase(
-                    getAnalytics.fulfilled,
-                    (state, action) => {
-
-                        state.isLoading = false;
-
-                        state.analytics =
-                            action.payload;
-                    }
-                )
-
-                .addCase(
-                    getAnalytics.rejected,
-                    (state, action) => {
-
-                        state.isLoading = false;
-
-                        state.error =
-                            action.payload;
-                    }
-                );
-        }
-
-    });
-
-
-export const {
-    clearError
-} = employeeSlice.actions;
-
+export const { clearError } = employeeSlice.actions;
 
 export default employeeSlice.reducer;

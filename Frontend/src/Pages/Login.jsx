@@ -1,146 +1,104 @@
 import { useEffect } from "react";
 
-import {
-    Formik,
-    Form,
-    Field,
-    ErrorMessage
-} from "formik";
+import { Formik, Form, Field, ErrorMessage } from "formik";
 
 import * as Yup from "yup";
 
-import {
-    useDispatch,
-    useSelector
-} from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
-import {
-    loginUser
-} from "../ReduxSlice/AuthSlice.jsx";
+import { loginUser } from "../ReduxSlice/AuthSlice.jsx";
 
-import {
-    Link,
-    useNavigate
-} from "react-router-dom";
-
+import { Link, useNavigate } from "react-router-dom";
 
 const loginSchema = Yup.object({
+  email: Yup.string()
+    .email("Enter a valid email")
+    .required("Email is required"),
 
-    email: Yup.string()
-        .email("Enter a valid email")
-        .required("Email is required"),
-
-    password: Yup.string()
-        .required("Password is required")
-
+  password: Yup.string().required("Password is required"),
 });
 
-
 const Login = () => {
+  const dispatch = useDispatch();
 
-    const dispatch = useDispatch();
+  const navigate = useNavigate();
 
-    const navigate = useNavigate();
+  const { isLoading, error, token } = useSelector((state) => state.auth);
+  useEffect(() => {
+    if (token) {
+      navigate("/dashboard", {
+        replace: true,
+      });
+    }
+  }, [token, navigate]);
 
+  const handleSubmit = async (values, { setSubmitting }) => {
+    try {
+      const result = await dispatch(loginUser(values));
 
-    const {
-        isLoading,
-        error,
-        token
-    } = useSelector(
-        (state) => state.auth
-    );
-    useEffect(() => {
+      if (loginUser.fulfilled.match(result)) {
+        navigate("/dashboard", {
+          replace: true,
+        });
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
-        if (token) {
-            navigate("/dashboard", {
-                replace: true
-            });
-        }
-
-    }, [token, navigate]);
-
-
-    const handleSubmit = async (
-        values,
-        { setSubmitting }
-    ) => {
-
-        try {
-
-            const result =
-                await dispatch(
-                    loginUser(values)
-                );
-
-            if (
-                loginUser.fulfilled.match(
-                    result
-                )
-            ) {
-
-                navigate("/dashboard", {
-                    replace: true
-                });
-
-            }
-
-        } finally {
-
-            setSubmitting(false);
-
-        }
-
-    };
-
-
-    return (
-
-        <div className="
+  return (
+    <div
+      className="
             min-h-screen
             flex
             items-center
             justify-center
             bg-gray-100
             px-4
-        ">
-
-            <div className="
+        "
+    >
+      <div
+        className="
                 w-full
                 max-w-md
-            ">
-
-                <div className="
+            "
+      >
+        <div
+          className="
                     rounded-2xl
                     bg-white
                     p-8
                     shadow-xl
-                ">
-
-                    <div className="
+                "
+        >
+          <div
+            className="
                         mb-8
                         text-center
-                    ">
-
-                        <h1 className="
+                    "
+          >
+            <h1
+              className="
                             text-3xl
                             font-bold
                             text-gray-800
-                        ">
-                            Welcome Back
-                        </h1>
+                        "
+            >
+              Welcome Back
+            </h1>
 
-                        <p className="
+            <p
+              className="
                             mt-2
                             text-gray-500
-                        ">
-                            Login to Employee Management
-                        </p>
-
-                    </div>
-                    {error && (
-
-                        <div className="
+                        "
+            >
+              Login to Employee Management
+            </p>
+          </div>
+          {error && (
+            <div
+              className="
                             mb-5
                             rounded-lg
                             border
@@ -149,61 +107,47 @@ const Login = () => {
                             p-3
                             text-sm
                             text-red-600
-                        ">
-                            {error}
-                        </div>
+                        "
+            >
+              {error}
+            </div>
+          )}
 
-                    )}
-
-
-                    <Formik
-
-                        initialValues={{
-                            email: "",
-                            password: ""
-                        }}
-
-                        validationSchema={
-                            loginSchema
-                        }
-
-                        onSubmit={
-                            handleSubmit
-                        }
-
-                    >
-
-                        {({
-                            isSubmitting
-                        }) => (
-
-                            <Form>
-
-                                <div className="
+          <Formik
+            initialValues={{
+              email: "",
+              password: "",
+            }}
+            validationSchema={loginSchema}
+            onSubmit={handleSubmit}
+          >
+            {({ isSubmitting }) => (
+              <Form>
+                <div
+                  className="
                                     mb-5
-                                ">
-
-                                    <label
-                                        htmlFor="email"
-                                        className="
+                                "
+                >
+                  <label
+                    htmlFor="email"
+                    className="
                                             mb-2
                                             block
                                             text-sm
                                             font-medium
                                             text-gray-700
                                         "
-                                    >
-                                        Email
-                                    </label>
+                  >
+                    Email
+                  </label>
 
-
-                                    <Field
-                                        id="email"
-                                        type="email"
-                                        name="email"
-                                        placeholder="Enter your email"
-                                        autoComplete="email"
-                                        className="
+                  <Field
+                    id="email"
+                    type="email"
+                    name="email"
+                    placeholder="Enter your email"
+                    autoComplete="email"
+                    className="
                                             w-full
                                             rounded-lg
                                             border
@@ -216,46 +160,44 @@ const Login = () => {
                                             focus:ring-2
                                             focus:ring-blue-100
                                         "
-                                    />
+                  />
 
-
-                                    <ErrorMessage
-                                        name="email"
-                                        component="p"
-                                        className="
+                  <ErrorMessage
+                    name="email"
+                    component="p"
+                    className="
                                             mt-1
                                             text-sm
                                             text-red-500
                                         "
-                                    />
+                  />
+                </div>
 
-                                </div>
-
-                                <div className="
+                <div
+                  className="
                                     mb-6
-                                ">
-
-                                    <label
-                                        htmlFor="password"
-                                        className="
+                                "
+                >
+                  <label
+                    htmlFor="password"
+                    className="
                                             mb-2
                                             block
                                             text-sm
                                             font-medium
                                             text-gray-700
                                         "
-                                    >
-                                        Password
-                                    </label>
+                  >
+                    Password
+                  </label>
 
-
-                                    <Field
-                                        id="password"
-                                        type="password"
-                                        name="password"
-                                        placeholder="Enter your password"
-                                        autoComplete="current-password"
-                                        className="
+                  <Field
+                    id="password"
+                    type="password"
+                    name="password"
+                    placeholder="Enter your password"
+                    autoComplete="current-password"
+                    className="
                                             w-full
                                             rounded-lg
                                             border
@@ -268,27 +210,22 @@ const Login = () => {
                                             focus:ring-2
                                             focus:ring-blue-100
                                         "
-                                    />
+                  />
 
-
-                                    <ErrorMessage
-                                        name="password"
-                                        component="p"
-                                        className="
+                  <ErrorMessage
+                    name="password"
+                    component="p"
+                    className="
                                             mt-1
                                             text-sm
                                             text-red-500
                                         "
-                                    />
-
-                                </div>
-                                <button
-                                    type="submit"
-                                    disabled={
-                                        isSubmitting ||
-                                        isLoading
-                                    }
-                                    className="
+                  />
+                </div>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || isLoading}
+                  className="
                                         w-full
                                         rounded-lg
                                         bg-blue-600
@@ -301,50 +238,38 @@ const Login = () => {
                                         disabled:cursor-not-allowed
                                         disabled:bg-blue-400
                                     "
-                                >
+                >
+                  {isLoading || isSubmitting ? "Logging in..." : "Login"}
+                </button>
 
-                                    {isLoading ||
-                                    isSubmitting
-                                        ? "Logging in..."
-                                        : "Login"}
-
-                                </button>
-
-                                <p className="
+                <p
+                  className="
                                     mt-6
                                     text-center
                                     text-sm
                                     text-gray-600
-                                ">
-
-                                    Don't have an account?
-
-                                    <Link
-                                        to="/register"
-                                        className="
+                                "
+                >
+                  Don't have an account?
+                  <Link
+                    to="/register"
+                    className="
                                             ml-1
                                             font-semibold
                                             text-blue-600
                                             hover:text-blue-700
                                         "
-                                    >
-                                        Register
-                                    </Link>
-
-                                </p>
-
-                            </Form>
-
-                        )}
-
-                    </Formik>
-
-                </div>
-
-            </div>
-
+                  >
+                    Register
+                  </Link>
+                </p>
+              </Form>
+            )}
+          </Formik>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default Login;
